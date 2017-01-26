@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    01/25/17 22:32:56
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    01/25/17 23:04:05
 $Fibonacci Project     (Project2.asm			     Page 1 - 1
 
 
@@ -67,38 +67,37 @@ $Fibonacci Project     (Project2.asm			     Page 1 - 1
 	   20 73 65 71 75
 	   65 6E 63 65 3F
 	   00
- 0000009B 45 6E 74 65 72	request2 byte "Enter a number between 1 and 46.",0
+ 0000009B 45 6E 74 65 72	request2 byte "Enter a number between 1 and 46: ",0
 	   20 61 20 6E 75
 	   6D 62 65 72 20
 	   62 65 74 77 65
 	   65 6E 20 31 20
 	   61 6E 64 20 34
-	   36 2E 00
- 000000BC 00000000		userNum DWORD ?
- 000000C0 54 68 65 20 76	rangeError1 byte "The value entered is out of range.",0
+	   36 3A 20 00
+ 000000BD 00000000		userNum DWORD ?
+ 000000C1 54 68 65 20 76	rangeError byte "The value entered is out of range.",0
 	   61 6C 75 65 20
 	   65 6E 74 65 72
 	   65 64 20 69 73
 	   20 6F 75 74 20
 	   6F 66 20 72 61
 	   6E 67 65 2E 00
- 000000E3 54 68 69 73 20	exit1 byte "This concludes the program.",0
+ 000000E4 54 68 69 73 20	exit1 byte "This concludes the program.",0
 	   63 6F 6E 63 6C
 	   75 64 65 73 20
 	   74 68 65 20 70
 	   72 6F 67 72 61
 	   6D 2E 00
- 000000FF 47 6F 6F 64 62	exit2 byte "Goodbye, ",0
+ 00000100 47 6F 6F 64 62	exit2 byte "Goodbye, ",0
 	   79 65 2C 20 00
- 00000109 00000000		loopTemp DWORD ?
- 0000010D 00000000		fibTemp DWORD ?
- 00000111 09 00			strTab byte "	",0
- 00000113 00000000		innerLoopCount DWORD ?
+ 0000010A 00000000		loopTemp DWORD ?
+ 0000010E 00000000		fibTemp DWORD ?
+ 00000112 09 00			strTab byte "	",0
+ 00000114 00000000		innerLoopCount DWORD ?
 
 
  00000000			.code
  00000000			main PROC
-				; (insert executable instructions here)
 					;starting message
  00000000  BA 00000000 R		mov		edx, OFFSET intro1
  00000005  E8 00000000 E		call		WriteString
@@ -112,7 +111,7 @@ $Fibonacci Project     (Project2.asm			     Page 1 - 1
  00000023  E8 00000000 E		call		WriteString
  00000028  BA 0000003D R		mov		edx, OFFSET userName
  0000002D  B9 00000015			mov		ecx, SIZEOF userName
- 00000032  E8 00000000 E		call		ReadString ;Input validation if time is available
+ 00000032  E8 00000000 E		call		ReadString
 					
 					;user greeting
  00000037  BA 00000052 R		mov		edx, OFFSET greeting
@@ -125,73 +124,92 @@ $Fibonacci Project     (Project2.asm			     Page 1 - 1
  00000050  BA 0000005E R		mov		edx, OFFSET request1
  00000055  E8 00000000 E		call		WriteString
  0000005A  E8 00000000 E		call		Crlf
- 0000005F  BA 0000009B R		mov		edx, OFFSET request2
- 00000064  E8 00000000 E		call		WriteString
- 00000069  E8 00000000 E		call		ReadDec  ;Need to add input validation here
- 0000006E  A3 000000BC R		mov		userNum, EAX
- 00000073  E8 00000000 E		call		Crlf
+ 0000005F  EB 14			jmp		intInput		;jumps over error message
 
- 00000078  8B 0D 000000BC R		mov		ECX, userNum
- 0000007E  B8 00000001			mov		EAX, 1
- 00000083  BB 00000001			mov		EBX, 1
- 00000088  C7 05 00000109 R		mov		loopTemp, 2
-	   00000002
- 00000092			L1:	;loop for Fibonacci sequence
- 00000092  C7 05 00000113 R		mov		innerLoopCount, 5
-	   00000005
- 0000009C  E8 00000000 E		call		Crlf
- 000000A1  BA 00000111 R		mov		EDX, OFFSET strTab
- 000000A6  83 3D 00000109 R		cmp		loopTemp, 2
-	   02
- 000000AD  74 2E			je		L3 ;jump to L3 for first two numbers in sequence
- 000000AF			L2:	;inner loop writes one line
- 000000AF  A3 0000010D R		mov		fibTemp, EAX
- 000000B4  03 C3			add		EAX, EBX
- 000000B6  8B 1D 0000010D R		mov		EBX, fibTemp
- 000000BC  E8 00000000 E		call		WriteDec
- 000000C1  E8 00000000 E		call		WriteString
- 000000C6  FF 0D 00000113 R		dec		innerLoopCount
- 000000CC  83 3D 00000113 R		cmp		innerLoopCount, 0
-	   00
- 000000D3  E1 BD			LOOPZ	L1 ;jumps to L1 every 5th number
- 000000D5  41				inc		ECX ;fixes ECX after LOOPZ decrements it
- 000000D6  E2 D7			loop		L2
+ 00000061			error:		;displays error message
+ 00000061  E8 00000000 E		call		Crlf
+ 00000066  BA 000000C1 R		mov		edx, OFFSET rangeError
+ 0000006B  E8 00000000 E		call		WriteString
+ 00000070  E8 00000000 E		call		Crlf
+
+ 00000075			intInput:
+ 00000075  BA 0000009B R		mov		edx, OFFSET request2
+ 0000007A  E8 00000000 E		call		WriteString
+ 0000007F  E8 00000000 E		call		ReadDec 
+ 00000084  A3 000000BD R		mov		userNum, EAX
 					
- 000000D8  83 F9 00			cmp		ECX, 0
- 000000DB  74 22			je		L4
+					;This section compares the input to the limits and jumps
+					;to the error message if input is out of bounds.
+ 00000089  70 D6			jo		error ;Jumps if non-integer is entered
+ 0000008B  83 F8 2E			cmp		EAX, UPPER_LIMIT
+ 0000008E  7F D1			jnle		error ;Jumps if over UPPER_LIMIT
+ 00000090  83 F8 01			cmp		EAX, LOWER_LIMIT
+ 00000093  7C CC			jnge		error ;Jumps if under LOWER_LIMIT
+					
+ 00000095  E8 00000000 E		call		Crlf
 
- 000000DD			L3:	;loop for first two numbers in sequence
- 000000DD  E8 00000000 E		call		WriteDec
- 000000E2  E8 00000000 E		call		WriteString
- 000000E7  FF 0D 00000113 R		dec		innerLoopCount
- 000000ED  FF 0D 00000109 R		dec		loopTemp
- 000000F3  83 3D 00000109 R		cmp		loopTemp, 0
+ 0000009A  8B 0D 000000BD R		mov		ECX, userNum
+ 000000A0  B8 00000001			mov		EAX, 1
+ 000000A5  BB 00000001			mov		EBX, 1
+ 000000AA  C7 05 0000010A R		mov		loopTemp, 2
+	   00000002
+ 000000B4			L1:	;loop for Fibonacci sequence
+ 000000B4  C7 05 00000114 R		mov		innerLoopCount, 5
+	   00000005
+ 000000BE  E8 00000000 E		call		Crlf
+ 000000C3  BA 00000112 R		mov		EDX, OFFSET strTab
+ 000000C8  83 3D 0000010A R		cmp		loopTemp, 2
+	   02
+ 000000CF  74 2E			je		L3 ;jump to L3 for first two numbers in sequence
+ 000000D1			L2:	;inner loop writes one line
+ 000000D1  A3 0000010E R		mov		fibTemp, EAX
+ 000000D6  03 C3			add		EAX, EBX
+ 000000D8  8B 1D 0000010E R		mov		EBX, fibTemp
+ 000000DE  E8 00000000 E		call		WriteDec
+ 000000E3  E8 00000000 E		call		WriteString
+ 000000E8  FF 0D 00000114 R		dec		innerLoopCount
+ 000000EE  83 3D 00000114 R		cmp		innerLoopCount, 0
 	   00
- 000000FA  E0 E1			loopne	L3
- 000000FC  41				inc		ECX
- 000000FD  E2 B0			loop		L2
+ 000000F5  E1 BD			LOOPZ	L1 ;jumps to L1 every 5th number
+ 000000F7  41				inc		ECX ;fixes ECX after LOOPZ decrements it
+ 000000F8  E2 D7			loop		L2
+					
+ 000000FA  83 F9 00			cmp		ECX, 0 ;End of Fibonnoci sequence, jumps over L3
+ 000000FD  74 22			je		L4
 
- 000000FF			L4:
-
- 000000FF  BA 000000E3 R		mov		EDX, OFFSET exit1
+ 000000FF			L3:	;loop for first two numbers in sequence
+ 000000FF  E8 00000000 E		call		WriteDec
  00000104  E8 00000000 E		call		WriteString
- 00000109  E8 00000000 E		call		Crlf
+ 00000109  FF 0D 00000114 R		dec		innerLoopCount
+ 0000010F  FF 0D 0000010A R		dec		loopTemp
+ 00000115  83 3D 0000010A R		cmp		loopTemp, 0
+	   00
+ 0000011C  E0 E1			loopne	L3
+ 0000011E  41				inc		ECX
+ 0000011F  E2 B0			loop		L2
 
- 0000010E  BA 000000FF R		mov		EDX, OFFSET exit2
- 00000113  E8 00000000 E		call		WriteString
- 00000118  BA 0000003D R		mov		EDX, OFFSET userName
- 0000011D  E8 00000000 E		call		WriteString
- 00000122  E8 00000000 E		call		Crlf
+ 00000121			L4:
+					;Exit text section
+ 00000121  E8 00000000 E		call		Crlf
+ 00000126  E8 00000000 E		call		Crlf
+ 0000012B  BA 000000E4 R		mov		EDX, OFFSET exit1
+ 00000130  E8 00000000 E		call		WriteString
+ 00000135  E8 00000000 E		call		Crlf
+
+ 0000013A  BA 00000100 R		mov		EDX, OFFSET exit2
+ 0000013F  E8 00000000 E		call		WriteString
+ 00000144  BA 0000003D R		mov		EDX, OFFSET userName
+ 00000149  E8 00000000 E		call		WriteString
+ 0000014E  E8 00000000 E		call		Crlf
 					
 					exit	; exit to operating system
- 00000127  6A 00	   *	    push   +000000000h
- 00000129  E8 00000000 E   *	    call   ExitProcess
- 0000012E			main ENDP
+ 00000153  6A 00	   *	    push   +000000000h
+ 00000155  E8 00000000 E   *	    call   ExitProcess
+ 0000015A			main ENDP
 
-				; (insert additional procedures here)
 
 				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    01/25/17 22:32:56
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    01/25/17 23:04:05
 $Fibonacci Project     (Project2.asm			     Symbols 2 - 1
 
 
@@ -285,8 +303,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000117 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000012E Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000118 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000015A Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -393,11 +411,13 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000012E Public STDCALL
-  L1 . . . . . . . . . . . . . .	L Near	 00000092 _TEXT	
-  L2 . . . . . . . . . . . . . .	L Near	 000000AF _TEXT	
-  L3 . . . . . . . . . . . . . .	L Near	 000000DD _TEXT	
-  L4 . . . . . . . . . . . . . .	L Near	 000000FF _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000015A Public STDCALL
+  error  . . . . . . . . . . . .	L Near	 00000061 _TEXT	
+  intInput . . . . . . . . . . .	L Near	 00000075 _TEXT	
+  L1 . . . . . . . . . . . . . .	L Near	 000000B4 _TEXT	
+  L2 . . . . . . . . . . . . . .	L Near	 000000D1 _TEXT	
+  L3 . . . . . . . . . . . . . .	L Near	 000000FF _TEXT	
+  L4 . . . . . . . . . . . . . .	L Near	 00000121 _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -622,14 +642,14 @@ black  . . . . . . . . . . . . .	Number	 00000000h
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
-exit1  . . . . . . . . . . . . .	Byte	 000000E3 _DATA	
-exit2  . . . . . . . . . . . . .	Byte	 000000FF _DATA	
+exit1  . . . . . . . . . . . . .	Byte	 000000E4 _DATA	
+exit2  . . . . . . . . . . . . .	Byte	 00000100 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
-fibTemp  . . . . . . . . . . . .	DWord	 0000010D _DATA	
+fibTemp  . . . . . . . . . . . .	DWord	 0000010E _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
 greeting . . . . . . . . . . . .	Byte	 00000052 _DATA	
-innerLoopCount . . . . . . . . .	DWord	 00000113 _DATA	
+innerLoopCount . . . . . . . . .	DWord	 00000114 _DATA	
 intro1 . . . . . . . . . . . . .	Byte	 00000000 _DATA	
 intro2 . . . . . . . . . . . . .	Byte	 00000013 _DATA	
 intro3 . . . . . . . . . . . . .	Byte	 00000024 _DATA	
@@ -639,15 +659,15 @@ lightGray  . . . . . . . . . . .	Number	 00000007h
 lightGreen . . . . . . . . . . .	Number	 0000000Ah   
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
-loopTemp . . . . . . . . . . . .	DWord	 00000109 _DATA	
+loopTemp . . . . . . . . . . . .	DWord	 0000010A _DATA	
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-rangeError1  . . . . . . . . . .	Byte	 000000C0 _DATA	
+rangeError . . . . . . . . . . .	Byte	 000000C1 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
 request1 . . . . . . . . . . . .	Byte	 0000005E _DATA	
 request2 . . . . . . . . . . . .	Byte	 0000009B _DATA	
-strTab . . . . . . . . . . . . .	Byte	 00000111 _DATA	
+strTab . . . . . . . . . . . . .	Byte	 00000112 _DATA	
 userName . . . . . . . . . . . .	Byte	 0000003D _DATA	
-userNum  . . . . . . . . . . . .	DWord	 000000BC _DATA	
+userNum  . . . . . . . . . . . .	DWord	 000000BD _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   

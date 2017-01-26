@@ -22,7 +22,7 @@ greeting byte "Greetings, ",0
 request1 byte "How many numbers would you like from the Fibonacci sequence?",0
 request2 byte "Enter a number between 1 and 46: ",0
 userNum DWORD ?
-rangeError1 byte "The value entered is out of range.",0
+rangeError byte "The value entered is out of range.",0
 exit1 byte "This concludes the program.",0
 exit2 byte "Goodbye, ",0
 loopTemp DWORD ?
@@ -33,7 +33,6 @@ innerLoopCount DWORD ?
 
 .code
 main PROC
-; (insert executable instructions here)
 	;starting message
 	mov		edx, OFFSET intro1
 	call		WriteString
@@ -47,7 +46,7 @@ main PROC
 	call		WriteString
 	mov		edx, OFFSET userName
 	mov		ecx, SIZEOF userName
-	call		ReadString ;Input validation if time is available
+	call		ReadString
 	
 	;user greeting
 	mov		edx, OFFSET greeting
@@ -60,10 +59,28 @@ main PROC
 	mov		edx, OFFSET request1
 	call		WriteString
 	call		Crlf
+	jmp		intInput		;jumps over error message
+
+error:		;displays error message
+	call		Crlf
+	mov		edx, OFFSET rangeError
+	call		WriteString
+	call		Crlf
+
+intInput:
 	mov		edx, OFFSET request2
 	call		WriteString
-	call		ReadDec  ;Need to add input validation here
+	call		ReadDec 
 	mov		userNum, EAX
+	
+	;This section compares the input to the limits and jumps
+	;to the error message if input is out of bounds.
+	jo		error ;Jumps if non-integer is entered
+	cmp		EAX, UPPER_LIMIT
+	jnle		error ;Jumps if over UPPER_LIMIT
+	cmp		EAX, LOWER_LIMIT
+	jnge		error ;Jumps if under LOWER_LIMIT
+	
 	call		Crlf
 
 	mov		ECX, userNum
@@ -88,7 +105,7 @@ L2:	;inner loop writes one line
 	inc		ECX ;fixes ECX after LOOPZ decrements it
 	loop		L2
 	
-	cmp		ECX, 0
+	cmp		ECX, 0 ;End of Fibonnoci sequence, jumps over L3
 	je		L4
 
 L3:	;loop for first two numbers in sequence
@@ -102,7 +119,9 @@ L3:	;loop for first two numbers in sequence
 	loop		L2
 
 L4:
-	call Crlf
+	;Exit text section
+	call		Crlf
+	call		Crlf
 	mov		EDX, OFFSET exit1
 	call		WriteString
 	call		Crlf
@@ -116,6 +135,5 @@ L4:
 	exit	; exit to operating system
 main ENDP
 
-; (insert additional procedures here)
 
 END main
