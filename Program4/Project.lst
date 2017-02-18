@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 21:42:33
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 22:11:46
 ,Composite Numbers Project     (Project4.asm		     Page 1 - 1
 
 
@@ -29,13 +29,12 @@ Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 21:42:33
 			      C .LIST
 			      C 
 
-				; (insert constant definitions here)
+				;constant values
  = 00000190			UPPER_LIMIT	=	400
  = 00000001			LOWER_LIMIT	=	1
 
  00000000			.data
 
-				; (insert variable definitions here)
  00000000 43 6F 6D 70 6F	intro1	byte		"Composite Numbers",0
 	   73 69 74 65 20
 	   4E 75 6D 62 65
@@ -105,22 +104,27 @@ Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 21:42:33
 
  0000000F  E8 00000105			call		bye
 
- 00000014  E8 00000000 E		call		Crlf
+ 00000014  E8 00000000 E		call		Crlf ;break point to test program
 					exit	; exit to operating system
  00000019  6A 00	   *	    push   +000000000h
  0000001B  E8 00000000 E   *	    call   ExitProcess
  00000020			main ENDP
 
 
-
+				;	introduction procedure
+				;	Inputs: none
+				;	Outputs: none
+				;	Description: Prints out greeting statements.
  00000020			intro PROC
 					;starting message
  00000020  BA 00000000 R		mov		EDX, OFFSET intro1
  00000025  E8 00000000 E		call		WriteString
  0000002A  E8 00000000 E		call		Crlf
+					
  0000002F  BA 00000012 R		mov		EDX, OFFSET intro2
  00000034  E8 00000000 E		call		WriteString
  00000039  E8 00000000 E		call		Crlf
+					
  0000003E  BA 000000C3 R		mov		EDX, OFFSET ec1
  00000043  E8 00000000 E		call		WriteString
  00000048  E8 00000000 E		call		Crlf
@@ -129,6 +133,12 @@ Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 21:42:33
 
  0000004E			intro ENDP
 
+				;	getUserData procedure
+				;	Inputs: none
+				;	Outputs: compcnt EAX, EDX (EAX and EDX used in validate PROC)
+				;	Description: Asks user for number of composites to display
+				;			validates input with validate procedure and sets
+				;			compcnt equal to user input.
  0000004E			getUserData PROC
 					;user instructions
  0000004E  BA 00000023 R		mov		EDX, OFFSET intro3
@@ -144,6 +154,14 @@ Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 21:42:33
  0000007B  C3				ret
  0000007C			getUserData ENDP
 
+				;	validate procedure
+				;	Inputs: EDX, EAX
+				;	Outputs: EAX
+				;	Description: First checks EDX to see if non-integer has been
+				;			entered, then compares EAX to UPPER_LIMIT and
+				;			LOWER_LIMIT. If any tests fail displays error, gets
+				;			user input again, and rechecks data. EAX is valid
+				;			when the procedure is done.
  0000007C			validate PROC
  0000007C  EB 14			jmp		check ;jumps over error message initially
 
@@ -162,6 +180,13 @@ Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 21:42:33
  000000A0  C3				ret
  000000A1			validate ENDP
 
+				;	showComposites procedure
+				;	Inputs: compcnt
+				;	Outputs: none
+				;	Description: Loop that calls showComposites and writes
+				;			the resulting composite then a space and every
+				;			10 entries goes to a new line. Loop continues
+				;			for compcnt number of times.
  000000A1			showComposites PROC
  000000A1  8B 0D 000000B5 R		mov	ECX, compcnt
 
@@ -186,6 +211,14 @@ Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 21:42:33
  000000E3  C3				ret
  000000E4			showComposites ENDP
 
+				;	isComposite procedure
+				;	Inputs: lastchk
+				;	Outputs: EAX
+				;	Description: Determines if the number after lastchk is a composite
+				;			via a division loop checking for remainders. If it is a 
+				;			composite the procedure sets EAX equal to it and ends.
+				;			If not it increments lastchk and continues until one is
+				;			found.
  000000E4			isComposite PROC
  000000E4  53				push		EBX
  000000E5  51				push		ECX
@@ -209,13 +242,17 @@ Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 21:42:33
  0000010E  EB D7			jmp		checkStart ;no factors, try new number
 
  00000110			isComp:
- 00000110  A1 000000BD R		mov		EAX, lastchk ;
+ 00000110  A1 000000BD R		mov		EAX, lastchk ;moves most recent composite to EAX
  00000115  5A				pop		EDX
  00000116  59				pop		ECX
  00000117  5B				pop		EBX
  00000118  C3				ret
  00000119			isComposite ENDP
 
+				;	bye procedure
+				;	Inputs: none
+				;	Outputs: none
+				;	Description: End of program statements.
  00000119			bye PROC
 					;goodbye message
  00000119  BA 000000E4 R		mov		EDX, OFFSET outtro1
@@ -226,7 +263,7 @@ Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 21:42:33
  00000129			bye ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 21:42:33
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 22:11:46
 ,Composite Numbers Project     (Project4.asm		     Symbols 2 - 1
 
 
