@@ -1,15 +1,14 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/07/17 22:27:20
-(Number Crunch Project     (Project3.asm		     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 21:42:33
+,Composite Numbers Project     (Project4.asm		     Page 1 - 1
 
 
-				TITLE Number Crunch Project     (Project3.asm)
+				TITLE Composite Numbers Project     (Project4.asm)
 
 				; Author: Thomas Buteau
-				; CS271-400 / Project 3                 Date: 2-12-17
-				; Description: This program take in numbers from the user ranging 
-				;			from -1 to -100 until the user enters a number 
-				;			outside of this range. Then the program the amount
-				;			of numbers entered, their sum, and average.
+				; CS271-400 / Project 4                 Date: 2-19-17
+				; Description: This program take in a number from the user ranging 
+				;			from 1 to 400 then calculates and displays that many
+				;			composite (non-prime) numbers at 10 per line.
 
 				INCLUDE Irvine32.inc
 			      C ; Include file for Irvine32.lib             (Irvine32.inc)
@@ -30,222 +29,205 @@ Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/07/17 22:27:20
 			      C .LIST
 			      C 
 
-				; constant definitions
- =-00000001			UPPER_LIMIT = -1
- =-00000064			LOWER_LIMIT = -100
+				; (insert constant definitions here)
+ = 00000190			UPPER_LIMIT	=	400
+ = 00000001			LOWER_LIMIT	=	1
 
  00000000			.data
 
 				; (insert variable definitions here)
- 00000000 4E 75 6D 62 65	intro1	byte	"Number Crunch",0
-	   72 20 43 72 75
-	   6E 63 68 00
- 0000000E 42 79 20 54 68	intro2	byte	"By Thomas Buteau",0
+ 00000000 43 6F 6D 70 6F	intro1	byte		"Composite Numbers",0
+	   73 69 74 65 20
+	   4E 75 6D 62 65
+	   72 73 00
+ 00000012 42 79 20 54 68	intro2	byte		"By Thomas Buteau",0
 	   6F 6D 61 73 20
 	   42 75 74 65 61
 	   75 00
- 0000001F 50 6C 65 61 73	intro3	byte	"Please enter your name: ",0
-	   65 20 65 6E 74
-	   65 72 20 79 6F
-	   75 72 20 6E 61
-	   6D 65 3A 20 00
- 00000038  00000015 [		userName	byte 21 dup(0)
-	    00
-	   ]
- 0000004D 47 72 65 65 74	greeting	byte	"Greetings, ",0
-	   69 6E 67 73 2C
-	   20 00
- 00000059 45 6E 74 65 72	request1	byte	"Enter numbers between -100 and -1 and I will crunch them for you.",0
-	   20 6E 75 6D 62
-	   65 72 73 20 62
-	   65 74 77 65 65
-	   6E 20 2D 31 30
-	   30 20 61 6E 64
-	   20 2D 31 20 61
-	   6E 64 20 49 20
-	   77 69 6C 6C 20
-	   63 72 75 6E 63
-	   68 20 74 68 65
-	   6D 20 66 6F 72
-	   20 79 6F 75 2E
-	   00
- 0000009B 45 6E 74 65 72	request2	byte	"Entering a number outside of this range begins the crunch.",0
-	   69 6E 67 20 61
-	   20 6E 75 6D 62
-	   65 72 20 6F 75
-	   74 73 69 64 65
-	   20 6F 66 20 74
-	   68 69 73 20 72
-	   61 6E 67 65 20
-	   62 65 67 69 6E
-	   73 20 74 68 65
-	   20 63 72 75 6E
-	   63 68 2E 00
- 000000D6 45 6E 74 65 72	request3	byte	"Enter number: ",0
-	   20 6E 75 6D 62
-	   65 72 3A 20 00
- 000000E5 00000000		intCount	dword	0
- 000000E9 00000000		intSum	dword	0
- 000000ED 4E 6F 20 76 61	error1	byte	"No valid numbers were entered.",0
-	   6C 69 64 20 6E
-	   75 6D 62 65 72
-	   73 20 77 65 72
-	   65 20 65 6E 74
-	   65 72 65 64 2E
-	   00
- 0000010C 54 68 65 20 61	numCount1	byte	"The amount of valid entries is: ",0
-	   6D 6F 75 6E 74
-	   20 6F 66 20 76
-	   61 6C 69 64 20
-	   65 6E 74 72 69
-	   65 73 20 69 73
-	   3A 20 00
- 0000012D 20 6E 75 6D 62	numCount2	byte	" numbers within the accepted range.",0
-	   65 72 73 20 77
-	   69 74 68 69 6E
+ 00000023 45 6E 74 65 72	intro3	byte		"Enter the number of composites to be displayed.",0
 	   20 74 68 65 20
-	   61 63 63 65 70
-	   74 65 64 20 72
-	   61 6E 67 65 2E
-	   00
- 00000151 54 68 65 20 73	sumText	byte "The sum of those numbers is ",0
-	   75 6D 20 6F 66
-	   20 74 68 6F 73
-	   65 20 6E 75 6D
-	   62 65 72 73 20
-	   69 73 20 00
- 0000016E 54 68 65 20 61	avgText	byte	"The average of those numbers is ",0
-	   76 65 72 61 67
-	   65 20 6F 66 20
-	   74 68 6F 73 65
-	   20 6E 75 6D 62
-	   65 72 73 20 69
-	   73 20 00
- 0000018F 54 68 61 6E 6B	bye1		byte	"Thank you for running Number Crunch.",0
-	   20 79 6F 75 20
-	   66 6F 72 20 72
-	   75 6E 6E 69 6E
-	   67 20 4E 75 6D
-	   62 65 72 20 43
-	   72 75 6E 63 68
-	   2E 00
- 000001B4 47 6F 6F 64 62	bye2		byte	"Goodbye, ",0
-	   79 65 2C 20 00
+	   6E 75 6D 62 65
+	   72 20 6F 66 20
+	   63 6F 6D 70 6F
+	   73 69 74 65 73
+	   20 74 6F 20 62
+	   65 20 64 69 73
+	   70 6C 61 79 65
+	   64 2E 00
+ 00000053 55 70 20 74 6F	intro4	byte		"Up to 400 composites can be displayed.",0
+	   20 34 30 30 20
+	   63 6F 6D 70 6F
+	   73 69 74 65 73
+	   20 63 61 6E 20
+	   62 65 20 64 69
+	   73 70 6C 61 79
+	   65 64 2E 00
+ 0000007A 55 73 65 72 20	error1	byte		"User input out of range. Enter a number between 1 and 400.",0
+	   69 6E 70 75 74
+	   20 6F 75 74 20
+	   6F 66 20 72 61
+	   6E 67 65 2E 20
+	   45 6E 74 65 72
+	   20 61 20 6E 75
+	   6D 62 65 72 20
+	   62 65 74 77 65
+	   65 6E 20 31 20
+	   61 6E 64 20 34
+	   30 30 2E 00
+ 000000B5 00000000		compcnt	dword	? ;user entered composite count
+ 000000B9 00000000		currcnt	dword	? ;current number of composites displayed
+ 000000BD 00000002		lastchk	dword	2 ;last number examined
+ 000000C1 09 00			space	byte		"	",0
+ 000000C3 2A 2A 45 43 3A	ec1		byte		"**EC: Output columns are alined.",0
+	   20 4F 75 74 70
+	   75 74 20 63 6F
+	   6C 75 6D 6E 73
+	   20 61 72 65 20
+	   61 6C 69 6E 65
+	   64 2E 00
+
+
+ 000000E4 54 68 69 73 20	outtro1	byte	"This concludes the program.",0
+	   63 6F 6E 63 6C
+	   75 64 65 73 20
+	   74 68 65 20 70
+	   72 6F 67 72 61
+	   6D 2E 00
 
  00000000			.code
  00000000			main PROC
+
+ 00000000  E8 0000001B			call		intro
+
+ 00000005  E8 00000044			call		getUserData
 					
-					;starting message
- 00000000  BA 00000000 R		mov		EDX, OFFSET intro1
- 00000005  E8 00000000 E		call		WriteString
- 0000000A  E8 00000000 E		call		Crlf
- 0000000F  BA 0000000E R		mov		EDX, OFFSET intro2
- 00000014  E8 00000000 E		call		WriteString
- 00000019  E8 00000000 E		call		Crlf
-					
-					;Requests the user's name
- 0000001E  BA 0000001F R		mov		EDX, OFFSET intro3
- 00000023  E8 00000000 E		call		WriteString
- 00000028  BA 00000038 R		mov		EDX, OFFSET userName
- 0000002D  B9 00000015			mov		ECX, SIZEOF userName
- 00000032  E8 00000000 E		call		ReadString
-					
-					;user greeting
- 00000037  BA 0000004D R		mov		EDX, OFFSET greeting
- 0000003C  E8 00000000 E		call		WriteString
- 00000041  BA 00000038 R		mov		EDX, OFFSET userName
- 00000046  E8 00000000 E		call		WriteString
- 0000004B  E8 00000000 E		call		Crlf
+ 0000000A  E8 00000092			call		showComposites
 
-					;user instructions
- 00000050  BA 00000059 R		mov		EDX, OFFSET request1
- 00000055  E8 00000000 E		call		WriteString
- 0000005A  E8 00000000 E		call		Crlf
- 0000005F  BA 0000009B R		mov		EDX, OFFSET request2
- 00000064  E8 00000000 E		call		WriteString
- 00000069  E8 00000000 E		call		Crlf
+ 0000000F  E8 00000105			call		bye
 
-					;user input loop
- 0000006E			InLoop:
- 0000006E  BA 000000D6 R		mov		EDX, OFFSET request3
- 00000073  E8 00000000 E		call		WriteString
- 00000078  E8 00000000 E		call		ReadInt
- 0000007D  70 38			jo		Summary ;goes to end if non-integer is entered
- 0000007F  83 F8 FF			cmp		EAX, UPPER_LIMIT
- 00000082  7F 33			jnle		Summary ;goes to end if greater than -1
- 00000084  83 F8 9C			cmp		EAX, LOWER_LIMIT
- 00000087  7C 2E			jnge		Summary ;goes to end if less than -100
-
-					;adds to the sum
- 00000089  8B 1D 000000E9 R		mov		EBX, intSum
- 0000008F  03 D8			add		EBX,EAX 
- 00000091  89 1D 000000E9 R		mov		intSum, EBX
-
-					;adds to the count
- 00000097  A1 000000E5 R		mov		EAX, intCount
- 0000009C  83 C0 01			add		EAX,1 
- 0000009F  A3 000000E5 R		mov		intCount, EAX
- 000000A4  EB C8			jmp		InLoop ;loops until user enters bad data
-
-					;error message if no valid numbers are entered
- 000000A6			Error:
- 000000A6  BA 000000ED R		mov		EDX, OFFSET error1
- 000000AB  E8 00000000 E		call		WriteString
- 000000B0  E8 00000000 E		call		Crlf
- 000000B5  EB 60			jmp		Bye
-
-					;calculates and prints results
- 000000B7			Summary:
-					;jumps to error message if no valid numbers are entered
- 000000B7  83 3D 000000E5 R		cmp		intCount, 0
-	   00
- 000000BE  74 E6			jz		Error
-					
-					;prints amount of numbers entered
- 000000C0  BA 0000010C R		mov		EDX, OFFSET numCount1
- 000000C5  E8 00000000 E		call		Crlf
- 000000CA  E8 00000000 E		call		WriteString
- 000000CF  A1 000000E5 R		mov		EAX, intCount
- 000000D4  E8 00000000 E		call		WriteDec
- 000000D9  E8 00000000 E		call		Crlf
-
-					;prints sum of numbers entered
- 000000DE  BA 00000151 R		mov		EDX, OFFSET sumText
- 000000E3  E8 00000000 E		call		WriteString
- 000000E8  A1 000000E9 R		mov		EAX,intSum
- 000000ED  E8 00000000 E		call		WriteInt
- 000000F2  E8 00000000 E		call		Crlf
-
-					;calculates and prints average of numbers enterd
- 000000F7  BA 0000016E R		mov		EDX, OFFSET avgText
- 000000FC  E8 00000000 E		call		WriteString
- 00000101  A1 000000E9 R		mov		EAX, intSum
- 00000106  99				CDQ		;extends the sign bit into EDX
- 00000107  F7 3D 000000E5 R		IDIV		intCount
- 0000010D  E8 00000000 E		call		WriteInt
- 00000112  E8 00000000 E		call		Crlf
-
- 00000117			Bye:
-					;goodbye statements
- 00000117  BA 0000018F R		mov		EDX, OFFSET bye1
- 0000011C  E8 00000000 E		call		WriteString
- 00000121  E8 00000000 E		call		Crlf
- 00000126  BA 000001B4 R		mov		EDX, OFFSET bye2
- 0000012B  E8 00000000 E		call		WriteString
- 00000130  BA 00000038 R		mov		EDX, OFFSET userName
- 00000135  E8 00000000 E		call		WriteString
- 0000013A  E8 00000000 E		call		Crlf
-					
+ 00000014  E8 00000000 E		call		Crlf
 					exit	; exit to operating system
- 0000013F  6A 00	   *	    push   +000000000h
- 00000141  E8 00000000 E   *	    call   ExitProcess
- 00000146			main ENDP
+ 00000019  6A 00	   *	    push   +000000000h
+ 0000001B  E8 00000000 E   *	    call   ExitProcess
+ 00000020			main ENDP
 
-				; (insert additional procedures here)
+
+
+ 00000020			intro PROC
+					;starting message
+ 00000020  BA 00000000 R		mov		EDX, OFFSET intro1
+ 00000025  E8 00000000 E		call		WriteString
+ 0000002A  E8 00000000 E		call		Crlf
+ 0000002F  BA 00000012 R		mov		EDX, OFFSET intro2
+ 00000034  E8 00000000 E		call		WriteString
+ 00000039  E8 00000000 E		call		Crlf
+ 0000003E  BA 000000C3 R		mov		EDX, OFFSET ec1
+ 00000043  E8 00000000 E		call		WriteString
+ 00000048  E8 00000000 E		call		Crlf
+					
+ 0000004D  C3				ret
+
+ 0000004E			intro ENDP
+
+ 0000004E			getUserData PROC
+					;user instructions
+ 0000004E  BA 00000023 R		mov		EDX, OFFSET intro3
+ 00000053  E8 00000000 E		call		WriteString
+ 00000058  E8 00000000 E		call		Crlf
+ 0000005D  BA 00000053 R		mov		EDX, OFFSET intro4
+ 00000062  E8 00000000 E		call		WriteString
+ 00000067  E8 00000000 E		call		Crlf
+ 0000006C  E8 00000000 E		call		ReadInt
+ 00000071  E8 00000006			call		validate
+ 00000076  A3 000000B5 R		mov		compcnt, EAX
+
+ 0000007B  C3				ret
+ 0000007C			getUserData ENDP
+
+ 0000007C			validate PROC
+ 0000007C  EB 14			jmp		check ;jumps over error message initially
+
+ 0000007E			inval:	;error message
+ 0000007E  BA 0000007A R		mov		EDX, OFFSET error1
+ 00000083  E8 00000000 E		call		WriteString
+ 00000088  E8 00000000 E		call		ReadInt
+ 0000008D  E8 00000000 E		call		Crlf
+
+ 00000092			check:	;checks EAX against upper and lower limits
+ 00000092  70 EA			jo		inval ;goes to end if non-integer is entered
+ 00000094  3D 00000190			cmp		EAX, UPPER_LIMIT
+ 00000099  7F E3			jnle		inval ;goes to end if greater than 400
+ 0000009B  83 F8 01			cmp		EAX, LOWER_LIMIT
+ 0000009E  7C DE			jnge		inval ;goes to end if less than 1
+ 000000A0  C3				ret
+ 000000A1			validate ENDP
+
+ 000000A1			showComposites PROC
+ 000000A1  8B 0D 000000B5 R		mov	ECX, compcnt
+
+ 000000A7			prtl:	;print loop
+ 000000A7  E8 00000038			call		isComposite
+ 000000AC  E8 00000000 E		call		WriteDec
+ 000000B1  BA 000000C1 R		mov		EDX, OFFSET space
+ 000000B6  E8 00000000 E		call		WriteString
+ 000000BB  FF 05 000000B9 R		inc		currcnt ;tracks number of composites printed
+ 000000C1  A1 000000B9 R		mov		EAX, currcnt
+ 000000C6  BB 0000000A			mov		EBX, 10
+ 000000CB  BA 00000000			mov		EDX, 0
+ 000000D0  F7 F3			div		EBX		
+ 000000D2  83 FA 00			cmp		EDX, 0	;compares remainder to 0
+ 000000D5  75 05			jne		prtl2	;if currcnt mod 10 != 0 jump
+ 000000D7  E8 00000000 E		call		Crlf		;new line every 10 entries
+ 000000DC			prtl2:	;print loop part 2
+ 000000DC  E2 C9			loop		prtl		
+					
+ 000000DE  E8 00000000 E		call		Crlf		;new line after all entries are finished
+
+ 000000E3  C3				ret
+ 000000E4			showComposites ENDP
+
+ 000000E4			isComposite PROC
+ 000000E4  53				push		EBX
+ 000000E5  51				push		ECX
+ 000000E6  52				push		EDX
+
+ 000000E7			checkstart:	
+ 000000E7  FF 05 000000BD R		inc		lastchk
+ 000000ED  8B 0D 000000BD R		mov		ECX, lastchk
+ 000000F3  49				dec		ECX
+ 000000F4  49				dec		ECX
+ 000000F5  BB 00000001			mov		EBX, 1
+
+ 000000FA			checkComp:	;loop checks for factors of lastchk
+ 000000FA  A1 000000BD R		mov		EAX, lastchk
+ 000000FF  BA 00000000			mov		EDX, 0
+ 00000104  43				inc		EBX
+ 00000105  F7 F3			div		EBX
+ 00000107  83 FA 00			cmp		EDX, 0
+ 0000010A  74 04			jz		isComp ;factors found, jump to isComp
+ 0000010C  E2 EC			loop		checkComp ;EBX is not factor, try EBX+1
+ 0000010E  EB D7			jmp		checkStart ;no factors, try new number
+
+ 00000110			isComp:
+ 00000110  A1 000000BD R		mov		EAX, lastchk ;
+ 00000115  5A				pop		EDX
+ 00000116  59				pop		ECX
+ 00000117  5B				pop		EBX
+ 00000118  C3				ret
+ 00000119			isComposite ENDP
+
+ 00000119			bye PROC
+					;goodbye message
+ 00000119  BA 000000E4 R		mov		EDX, OFFSET outtro1
+ 0000011E  E8 00000000 E		call		WriteString
+ 00000123  E8 00000000 E		call		Crlf
+					
+ 00000128  C3				ret
+ 00000129			bye ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/07/17 22:27:20
-(Number Crunch Project     (Project3.asm		     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    02/17/17 21:42:33
+,Composite Numbers Project     (Project4.asm		     Symbols 2 - 1
 
 
 
@@ -338,8 +320,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000001BE Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000146 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000100 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000129 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -446,13 +428,22 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000146 Public STDCALL
-  InLoop . . . . . . . . . . . .	L Near	 0000006E _TEXT	
-  Error  . . . . . . . . . . . .	L Near	 000000A6 _TEXT	
-  Summary  . . . . . . . . . . .	L Near	 000000B7 _TEXT	
-  Bye  . . . . . . . . . . . . .	L Near	 00000117 _TEXT	
+bye  . . . . . . . . . . . . . .	P Near	 00000119 _TEXT	Length= 00000010 Public STDCALL
+getUserData  . . . . . . . . . .	P Near	 0000004E _TEXT	Length= 0000002E Public STDCALL
+intro  . . . . . . . . . . . . .	P Near	 00000020 _TEXT	Length= 0000002E Public STDCALL
+isComposite  . . . . . . . . . .	P Near	 000000E4 _TEXT	Length= 00000035 Public STDCALL
+  checkstart . . . . . . . . . .	L Near	 000000E7 _TEXT	
+  checkComp  . . . . . . . . . .	L Near	 000000FA _TEXT	
+  isComp . . . . . . . . . . . .	L Near	 00000110 _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000020 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+showComposites . . . . . . . . .	P Near	 000000A1 _TEXT	Length= 00000043 Public STDCALL
+  prtl . . . . . . . . . . . . .	L Near	 000000A7 _TEXT	
+  prtl2  . . . . . . . . . . . .	L Near	 000000DC _TEXT	
+validate . . . . . . . . . . . .	P Near	 0000007C _TEXT	Length= 00000025 Public STDCALL
+  inval  . . . . . . . . . . . .	L Near	 0000007E _TEXT	
+  check  . . . . . . . . . . . .	L Near	 00000092 _TEXT	
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
@@ -542,7 +533,7 @@ KEY_EVENT  . . . . . . . . . . .	Number	 00000001h
 KEY_MASKS  . . . . . . . . . . .	Number	 0000001Fh   
 LEFT_ALT_PRESSED . . . . . . . .	Number	 00000002h   
 LEFT_CTRL_PRESSED  . . . . . . .	Number	 00000008h   
-LOWER_LIMIT  . . . . . . . . . .	Number	 -00000064h   
+LOWER_LIMIT  . . . . . . . . . .	Number	 00000001h   
 MB_ABORTRETRYIGNORE  . . . . . .	Number	 00000002h   
 MB_APPLMODAL . . . . . . . . . .	Number	 00000000h   
 MB_CANCELTRYCONTINUE . . . . . .	Number	 00000006h   
@@ -589,7 +580,7 @@ SetConsoleTitle  . . . . . . . .	Text   	 SetConsoleTitleA
 TAB  . . . . . . . . . . . . . .	Number	 00000009h   
 TRUE . . . . . . . . . . . . . .	Number	 00000001h   
 TRUNCATE_EXISTING  . . . . . . .	Number	 00000005h   
-UPPER_LIMIT  . . . . . . . . . .	Number	 -00000001h   
+UPPER_LIMIT  . . . . . . . . . .	Number	 00000190h   
 VK_11  . . . . . . . . . . . . .	Number	 000000BDh   
 VK_12  . . . . . . . . . . . . .	Number	 000000BBh   
 VK_ADD . . . . . . . . . . . . .	Number	 0000006Bh   
@@ -671,23 +662,22 @@ VK_UP  . . . . . . . . . . . . .	Number	 00000026h
 WINDOW_BUFFER_SIZE_EVENT . . . .	Number	 00000004h   
 WriteConsoleOutputCharacter  . .	Text   	 WriteConsoleOutputCharacterA
 WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
-avgText  . . . . . . . . . . . .	Byte	 0000016E _DATA	
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-bye1 . . . . . . . . . . . . . .	Byte	 0000018F _DATA	
-bye2 . . . . . . . . . . . . . .	Byte	 000001B4 _DATA	
+compcnt  . . . . . . . . . . . .	DWord	 000000B5 _DATA	
+currcnt  . . . . . . . . . . . .	DWord	 000000B9 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
-error1 . . . . . . . . . . . . .	Byte	 000000ED _DATA	
+ec1  . . . . . . . . . . . . . .	Byte	 000000C3 _DATA	
+error1 . . . . . . . . . . . . .	Byte	 0000007A _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
-greeting . . . . . . . . . . . .	Byte	 0000004D _DATA	
-intCount . . . . . . . . . . . .	DWord	 000000E5 _DATA	
-intSum . . . . . . . . . . . . .	DWord	 000000E9 _DATA	
 intro1 . . . . . . . . . . . . .	Byte	 00000000 _DATA	
-intro2 . . . . . . . . . . . . .	Byte	 0000000E _DATA	
-intro3 . . . . . . . . . . . . .	Byte	 0000001F _DATA	
+intro2 . . . . . . . . . . . . .	Byte	 00000012 _DATA	
+intro3 . . . . . . . . . . . . .	Byte	 00000023 _DATA	
+intro4 . . . . . . . . . . . . .	Byte	 00000053 _DATA	
+lastchk  . . . . . . . . . . . .	DWord	 000000BD _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -695,14 +685,9 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-numCount1  . . . . . . . . . . .	Byte	 0000010C _DATA	
-numCount2  . . . . . . . . . . .	Byte	 0000012D _DATA	
+outtro1  . . . . . . . . . . . .	Byte	 000000E4 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-request1 . . . . . . . . . . . .	Byte	 00000059 _DATA	
-request2 . . . . . . . . . . . .	Byte	 0000009B _DATA	
-request3 . . . . . . . . . . . .	Byte	 000000D6 _DATA	
-sumText  . . . . . . . . . . . .	Byte	 00000151 _DATA	
-userName . . . . . . . . . . . .	Byte	 00000038 _DATA	
+space  . . . . . . . . . . . . .	Byte	 000000C1 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
