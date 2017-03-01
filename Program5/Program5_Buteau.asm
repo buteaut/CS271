@@ -22,7 +22,9 @@ intro2	byte		"By Thomas Buteau",0
 intro3	byte		"Enter the amount of numbers in the array.",0
 intro4	byte		"The min/max array size is 10/200.",0
 error1	byte		"User input out of range. Enter a number between 10 and 200.",0
+disp1	byte		"The values in the array are: ",0
 space1	byte		"	",0
+medi1	byte		"The median value in the array is ",0
 
 arrSize	dword	?
 array	dword	USER_MAX	DUP(?)
@@ -38,6 +40,9 @@ main PROC
 	push		OFFSET	arrSize
 	call		getUserData
 	call		generate
+	call		display
+	call		sort
+	call		median
 	call		display
 
 	exit	; exit to operating system
@@ -164,6 +169,10 @@ display PROC
 	mov		ESI, [EBP+12]	;move array address to ESI
 	mov		EAX, [EBP+8]	
 	mov		ECX, [EAX]	;move arrSize to ECX
+
+	mov		EDX, OFFSET disp1
+	call		WriteString
+	call		Crlf
 	
 
 PrintL:	;loop that prints the contents of the array
@@ -191,4 +200,66 @@ PrintL2:	;PrintL loop part 2
 	pop		EBP
 	ret
 display ENDP
+
+;	sort procedure
+;	Inputs: array, arrSize (both from system stack)
+;	Outputs: none
+;	Description: Sorts the array in descending order. Largely taken
+;			from BubbleSort program on page 375 of textbook.
+sort PROC
+	push		EBP
+	mov		EBP, ESP
+
+	mov		EBX, [EBP+8]
+	mov		ECX, [EBX]	;move arrSize to ECX
+	dec		ECX
+
+L1:
+	push		ECX
+	mov		EBX, [EBP+12]	;move array address to ESI
+	mov		ESI, EBX
+
+L2:
+	mov		EAX, [ESI]
+	cmp		[ESI+4], EAX
+	jnge		L3
+	xchg		EAX, [ESI+4]
+	mov		[ESI], EAX
+
+L3:
+	add		ESI, 4
+	loop		L2
+
+	pop		ECX
+	loop		L1
+	
+	pop		EBP
+	ret
+sort ENDP
+
+median PROC
+	push		EBP
+	mov		EBP, ESP
+
+	mov		EBX, [EBP+8]
+	mov		EAX, [EBX]	;move arrSize to EAX
+	mov		EDX, 0
+	mov		EBX, 2
+	div		EBX
+	mov		EBX, 4
+	mul		EBX
+	mov		ESI, [EBP+12]
+	mov		EAX, [ESI+EAX]
+
+	mov		EDX, OFFSET medi1
+	call		Crlf
+	call		WriteString
+	call		WriteDec
+	call		Crlf
+	call		Crlf
+
+	pop		EBP
+	ret
+median ENDP
+
 END main
