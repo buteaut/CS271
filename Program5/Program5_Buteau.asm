@@ -69,8 +69,8 @@ intro PROC
 intro ENDP
 
 ;	getUserData procedure
-;	Inputs: none
-;	Outputs: arrSize EAX, EDX (EAX and EDX used in validate PROC)
+;	Inputs: arrSize (both from system stack)
+;	Outputs: arrSize EAX, EDX (in system stack)
 ;	Description: Asks user for amount of numbers to fill array with,
 ;			validates input with validate procedure, and sets
 ;			arrSize equal to user input.
@@ -96,8 +96,8 @@ getUserData PROC
 getUserData ENDP
 
 ;	validate procedure
-;	Inputs: EDX, EAX
-;	Outputs: EAX
+;	Inputs: EDX, EAX (from system stack)
+;	Outputs: EAX (in system stack)
 ;	Description: First checks EDX to see if non-integer has been
 ;			entered, then compares EAX to USER_MAX and
 ;			USER_MIN. If any tests fail displays error, gets
@@ -185,13 +185,13 @@ PrintL:	;loop that prints the contents of the array
 	inc		EAX
 	sub		EAX, ECX
 	cmp		EAX, 0
-	je		PrintL2
+	je		PrintL2	;prevents new line on first iteration
 	mov		EBX, 10
 	mov		EDX, 0
 	div		EBX
-	cmp		EDX, 0
-	jne		PrintL2
-	call		Crlf
+	cmp		EDX, 0	;will be 0 every 10 iterations
+	jne		PrintL2	
+	call		Crlf		;new line every 10 iterations
 PrintL2:	;PrintL loop part 2
 	loop		PrintL
 
@@ -223,7 +223,7 @@ L2:
 	mov		EAX, [ESI]
 	cmp		[ESI+4], EAX
 	jnge		L3
-	xchg		EAX, [ESI+4]
+	xchg		EAX, [ESI+4]	;if smaller than next number in array switch them
 	mov		[ESI], EAX
 
 L3:
@@ -237,6 +237,11 @@ L3:
 	ret
 sort ENDP
 
+
+;	median procedure
+;	Inputs: array, arrSize (both from system stack)
+;	Outputs: none
+;	Description: Displays the median number in the array.
 median PROC
 	push		EBP
 	mov		EBP, ESP
@@ -245,11 +250,11 @@ median PROC
 	mov		EAX, [EBX]	;move arrSize to EAX
 	mov		EDX, 0
 	mov		EBX, 2
-	div		EBX
+	div		EBX			;finds midpoint of array
 	mov		EBX, 4
-	mul		EBX
-	mov		ESI, [EBP+12]
-	mov		EAX, [ESI+EAX]
+	mul		EBX			;midpoint of array address offset
+	mov		ESI, [EBP+12]	;move array to ESI
+	mov		EAX, [ESI+EAX]	;move median of array to EAX
 
 	mov		EDX, OFFSET medi1
 	call		Crlf
