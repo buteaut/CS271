@@ -1,16 +1,14 @@
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/16/17 00:24:29
-Array Sort     (Program5.asm				     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/16/17 21:20:48
+Macro Array     (Program6a.asm				     Page 1 - 1
 
 
-				TITLE Array Sort     (Program5.asm)
+				TITLE Macro Array     (Program6a.asm)
 
 				; Author: Thomas Buteau
-				; CS271-400 / Project 5                 Date: 3-5-17
-				; Description: This program generates a user determined number, between
-				;			10 and 200, of random numbers and puts them in an array.
-				;			The array is then displayed, sorted from largest to smallest,
-				;			then the sorted array is also displayed along with the median
-				;			value which is rounded to the nearest int.
+				; CS271-400 / Project 6a                Date: 3-19-17
+				; Description: This program utilizes macros and procedures to collect an array of 
+				;		10 unsigned 32bit numbers from the user then display them as well as 
+				;		their sum and average.
 
 				INCLUDE Irvine32.inc
 			      C ; Include file for Irvine32.lib             (Irvine32.inc)
@@ -32,312 +30,502 @@ Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/16/17 00:24:29
 			      C 
 
 				; (insert constant definitions here)
- = 0000000A			USER_MIN	=	10	; minimum user defined range of numbers for the array
- = 000000C8			USER_MAX	=	200	; maximum user defined range of numbers for the array
- = 00000064			RAND_MIN	=	100	; minimum randomly generated number
- = 000003E7			RAND_MAX	=	999	; maximum randomly generated number
+ = 0000000A			ARR_MAX	=	10	;maximum amount of numbers in the array
+ = 00000001			USER_MIN	=	1	;minimum number accepted from user
+ = 19999999			USER_MAX	=	429496729	;max number accepted from user
+				;displayString macro taken from lecture 26 video mWriteStr macro
+				displayString	MACRO	buffer
+					push	EDX
+					mov	EDX, [buffer]
+					call	WriteString
+					pop	EDX
+				ENDM
+
+				;getString macro taken from lecture 26 video mReadStr macro with small alterations
+				getString	MACRO	buffer, prompt
+					push	ECX
+					push	EDX
+					mov	EDX, [prompt]
+					call	WriteString
+					mov	EDX, [buffer]
+					mov	ECX, 11 ;hardcoded to continue testing, fix before deadline
+					call	ReadString
+					pop	EDX
+					pop	ECX
+				ENDM
 
  00000000			.data
- 00000000 41 72 72 61 79	intro1	byte		"Array Sort",0
-	   20 53 6F 72 74
-	   00
- 0000000B 42 79 20 54 68	intro2	byte		"By Thomas Buteau",0
+ 00000000 4D 61 63 72 6F	intro1	byte		"Macro Array",0
+	   20 41 72 72 61
+	   79 00
+ 0000000C 42 79 20 54 68	intro2	byte		"By Thomas Buteau",0
 	   6F 6D 61 73 20
 	   42 75 74 65 61
 	   75 00
- 0000001C 45 6E 74 65 72	intro3	byte		"Enter the amount of numbers in the array.",0
-	   20 74 68 65 20
-	   61 6D 6F 75 6E
-	   74 20 6F 66 20
-	   6E 75 6D 62 65
-	   72 73 20 69 6E
-	   20 74 68 65 20
-	   61 72 72 61 79
-	   2E 00
- 00000046 54 68 65 20 6D	intro4	byte		"The min/max array size is 10/200.",0
-	   69 6E 2F 6D 61
-	   78 20 61 72 72
-	   61 79 20 73 69
-	   7A 65 20 69 73
-	   20 31 30 2F 32
-	   30 30 2E 00
- 00000068 55 73 65 72 20	error1	byte		"User input out of range. Enter a number between 10 and 200.",0
-	   69 6E 70 75 74
-	   20 6F 75 74 20
-	   6F 66 20 72 61
-	   6E 67 65 2E 20
-	   45 6E 74 65 72
-	   20 61 20 6E 75
-	   6D 62 65 72 20
-	   62 65 74 77 65
-	   65 6E 20 31 30
-	   20 61 6E 64 20
-	   32 30 30 2E 00
- 000000A4 54 68 65 20 76	disp1	byte		"The values in the array are: ",0
-	   61 6C 75 65 73
-	   20 69 6E 20 74
-	   68 65 20 61 72
-	   72 61 79 20 61
-	   72 65 3A 20 00
- 000000C2 09 00			space1	byte		"	",0
- 000000C4 54 68 65 20 6D	medi1	byte		"The median value in the array is ",0
-	   65 64 69 61 6E
-	   20 76 61 6C 75
-	   65 20 69 6E 20
-	   74 68 65 20 61
-	   72 72 61 79 20
-	   69 73 20 00
+ 0000001D 45 6E 74 65 72	intro3	byte		"Enter 10 positive integers and I'll display them as well as their sum and average.",0
+	   20 31 30 20 70
+	   6F 73 69 74 69
+	   76 65 20 69 6E
+	   74 65 67 65 72
+	   73 20 61 6E 64
+	   20 49 27 6C 6C
+	   20 64 69 73 70
+	   6C 61 79 20 74
+	   68 65 6D 20 61
+	   73 20 77 65 6C
+	   6C 20 61 73 20
+	   74 68 65 69 72
+	   20 73 75 6D 20
+	   61 6E 64 20 61
+	   76 65 72 61 67
+	   65 2E 00
+ 00000070 55 73 65 72 20	intro4	byte		"User value: ",0
+	   76 61 6C 75 65
+	   3A 20 00
 
- 000000E6 00000000		arrSize	dword	?
- 000000EA  000000C8 [		array	dword	USER_MAX	DUP(?)
+ 0000007D  0000000B [		read1	byte		11	DUP(0) ;user input string to convert to number
+	    00
+	   ]
+ 00000088 00000000		covnum	dword	?	;converted number from user input string
+ 0000008C 0000000A		arrSize	dword	ARR_MAX
+ 00000090  0000000A [		intArr	dword	ARR_MAX	DUP(?)
 	    00000000
 	   ]
+ 000000B8 54 68 65 20 61	result1	byte		"The array of integers is as follows:",0
+	   72 72 61 79 20
+	   6F 66 20 69 6E
+	   74 65 67 65 72
+	   73 20 69 73 20
+	   61 73 20 66 6F
+	   6C 6C 6F 77 73
+	   3A 00
+ 000000DD 09 00			tab1		byte		"	",0
+ 000000DF 54 68 65 20 73	result2	byte		"The sum of the integers is: ",0
+	   75 6D 20 6F 66
+	   20 74 68 65 20
+	   69 6E 74 65 67
+	   65 72 73 20 69
+	   73 3A 20 00
+ 000000FC 54 68 65 20 61	result3	byte		"The average of the integers is: ",0
+	   76 65 72 61 67
+	   65 20 6F 66 20
+	   74 68 65 20 69
+	   6E 74 65 67 65
+	   72 73 20 69 73
+	   3A 20 00
+ 0000011D			sum		qword	0
+	   0000000000000000
+ 00000125 00000000		mean		dword	0
+
+ 00000129 54 68 65 20 75	error1	byte		"The user entry is not a valid positive integer, please try again.",0
+	   73 65 72 20 65
+	   6E 74 72 79 20
+	   69 73 20 6E 6F
+	   74 20 61 20 76
+	   61 6C 69 64 20
+	   70 6F 73 69 74
+	   69 76 65 20 69
+	   6E 74 65 67 65
+	   72 2C 20 70 6C
+	   65 61 73 65 20
+	   74 72 79 20 61
+	   67 61 69 6E 2E
+	   00
+
 				; (insert variable definitions here)
 
  00000000			.code
  00000000			main PROC
 
 				; (insert executable instructions here)
- 00000000  E8 00000000 E		call		Randomize ;seeds random for RandomRange
- 00000005  E8 0000002F			call		intro
- 0000000A  68 000000EA R		push		OFFSET	array
- 0000000F  68 000000E6 R		push		OFFSET	arrSize
- 00000014  E8 0000003F			call		getUserData
- 00000019  E8 000000A3			call		generate
- 0000001E  E8 000000C2			call		display
- 00000023  E8 00000114			call		sort
- 00000028  E8 00000134			call		median
- 0000002D  E8 000000B3			call		display
+ 00000000  68 00000000 R		push	OFFSET	intro1
+ 00000005  68 0000000C R		push	OFFSET	intro2
+ 0000000A  68 0000001D R		push	OFFSET	intro3
 
+ 0000000F  E8 00000088			call	intro
+
+ 00000014  68 00000088 R		push	OFFSET	covnum
+ 00000019  68 00000090 R		push	OFFSET	intArr
+ 0000001E  FF 35 0000008C R		push			arrSize
+ 00000024  68 00000129 R		push	OFFSET	error1
+ 00000029  68 00000070 R		push	OFFSET	intro4
+ 0000002E  68 0000007D R		push	OFFSET	read1
+
+ 00000033  E8 0000009D			call readVal
+
+ 00000038  68 00000090 R		push OFFSET	intArr
+ 0000003D  FF 35 0000008C R		push			arrSize
+ 00000043  68 0000011D R		push	OFFSET	sum
+
+ 00000048  E8 00000116			call sumArr
+
+ 0000004D  68 0000011D R		push	OFFSET	sum
+ 00000052  FF 35 0000008C R		push			arrSize
+ 00000058  68 00000125 R		push	OFFSET	mean
+
+ 0000005D  E8 00000126			call	aveArr
+
+					;push	OFFSET	sum
+
+					;call	writeVal
+ 00000062  68 00000125 R		push	OFFSET	mean
+ 00000067  68 000000FC R		push	OFFSET	result3
+ 0000006C  68 0000011D R		push	OFFSET	sum
+ 00000071  68 000000DF R		push	OFFSET	result2
+ 00000076  68 000000DD R		push	OFFSET	tab1
+ 0000007B  68 00000090 R		push	OFFSET	intArr
+ 00000080  FF 35 0000008C R		push			arrSize
+ 00000086  68 000000B8 R		push	OFFSET	result1
+ 0000008B  E8 0000018C			call	results
+					
+					;call	WriteDec ;testing purposes
+ 00000090  E8 00000000 E		call	Crlf
 					exit	; exit to operating system
- 00000032  6A 00	   *	    push   +000000000h
- 00000034  E8 00000000 E   *	    call   ExitProcess
- 00000039			main ENDP
+ 00000095  6A 00	   *	    push   +000000000h
+ 00000097  E8 00000000 E   *	    call   ExitProcess
+ 0000009C			main ENDP
 
-				; (insert additional procedures here)
+
 
 				;	introduction procedure
 				;	Inputs: none
 				;	Outputs: none
 				;	Description: Prints out greeting statements.
- 00000039			intro PROC
+ 0000009C			intro PROC
 					;starting message
- 00000039  BA 00000000 R		mov		EDX, OFFSET intro1
- 0000003E  E8 00000000 E		call		WriteString
- 00000043  E8 00000000 E		call		Crlf
+ 0000009C  55				push		EBP
+ 0000009D  8B EC			mov		EBP, ESP
+					displayString	EBP+16 ;Title
+ 0000009F  52		     1		push	EDX
+ 000000A0  8B 55 10	     1		mov	EDX, [EBP+16]
+ 000000A3  E8 00000000 E     1		call	WriteString
+ 000000A8  5A		     1		pop	EDX
+ 000000A9  E8 00000000 E		call		Crlf
+					displayString	EBP+12 ;Author
+ 000000AE  52		     1		push	EDX
+ 000000AF  8B 55 0C	     1		mov	EDX, [EBP+12]
+ 000000B2  E8 00000000 E     1		call	WriteString
+ 000000B7  5A		     1		pop	EDX
+ 000000B8  E8 00000000 E		call		Crlf
+					displayString	EBP+8 ;Description
+ 000000BD  52		     1		push	EDX
+ 000000BE  8B 55 08	     1		mov	EDX, [EBP+8]
+ 000000C1  E8 00000000 E     1		call	WriteString
+ 000000C6  5A		     1		pop	EDX
+ 000000C7  E8 00000000 E		call		Crlf
+ 000000CC  E8 00000000 E		call		Crlf
 					
- 00000048  BA 0000000B R		mov		EDX, OFFSET intro2
- 0000004D  E8 00000000 E		call		WriteString
- 00000052  E8 00000000 E		call		Crlf
+ 000000D1  5D				pop		EBP
+ 000000D2  C2 000C			ret	12
 
- 00000057  C3				ret
-
- 00000058			intro ENDP
+ 000000D5			intro ENDP
 
 				;	getUserData procedure
-				;	Inputs: arrSize (both from system stack)
-				;	Outputs: arrSize EAX, EDX (in system stack)
-				;	Description: Asks user for amount of numbers to fill array with,
-				;			validates input with validate procedure, and sets
-				;			arrSize equal to user input.
- 00000058			getUserData PROC
+				;	Inputs: read1, intro4, error1, arrSize, intArr, covnum (all from system stack)
+				;	Outputs: intArr
+				;	Description: runs loop that gets user data, calls validate, then adds 
+				;			user data to array.
+ 000000D5			readVal PROC
 					;user instructions
- 00000058  55				push		EBP
- 00000059  8B EC			mov		EBP, ESP
- 0000005B  BA 0000001C R		mov		EDX, OFFSET intro3
- 00000060  E8 00000000 E		call		WriteString
- 00000065  E8 00000000 E		call		Crlf
- 0000006A  BA 00000046 R		mov		EDX, OFFSET intro4
- 0000006F  E8 00000000 E		call		WriteString
- 00000074  E8 00000000 E		call		Crlf
- 00000079  E8 00000000 E		call		ReadInt
- 0000007E  50				push		EAX
- 0000007F  52				push		EDX
- 00000080  E8 00000008			call		validate
- 00000085  58				pop		EAX
- 00000086  8B 5D 08			mov		EBX, [EBP+8]
- 00000089  89 03			mov		[EBX], EAX
- 0000008B  5D				pop		EBP
- 0000008C  C3				ret
- 0000008D			getUserData ENDP
+ 000000D5  55				push		EBP
+ 000000D6  8B EC			mov		EBP, ESP
+ 000000D8  8B 4D 14			mov		ECX, [EBP+20] ;arrSize
+ 000000DB  8B 7D 18			mov		EDI, [EBP+24] ;intArr
+ 000000DE			ArrLoop1: ;loops getting input from user and putting it in the array
+					getString	EBP+8, EBP+12
+ 000000DE  51		     1		push	ECX
+ 000000DF  52		     1		push	EDX
+ 000000E0  8B 55 0C	     1		mov	EDX, [EBP+12]
+ 000000E3  E8 00000000 E     1		call	WriteString
+ 000000E8  8B 55 08	     1		mov	EDX, [EBP+8]
+ 000000EB  B9 0000000B	     1		mov	ECX, 11 ;hardcoded to continue testing, fix before deadline
+ 000000F0  E8 00000000 E     1		call	ReadString
+ 000000F5  5A		     1		pop	EDX
+ 000000F6  59		     1		pop	ECX
+ 000000F7  E8 00000000 E		call		Crlf
+ 000000FC  E8 0000000D			call	validate
+ 00000101  8B 75 1C			mov		ESI, [EBP+28] ;covnum
+ 00000104  8B 06			mov		EAX,[ESI]
+ 00000106  FC				cld
+ 00000107  AB				stosd ;adds EAX value to location stored in EDI
+ 00000108  E2 D4			loop arrLoop1
+ 0000010A  5D				pop		EBP
+ 0000010B  C2 0018			ret	24
+ 0000010E			readVal ENDP
 
 				;	validate procedure
-				;	Inputs: EDX, EAX (from system stack)
-				;	Outputs: EAX (in system stack)
-				;	Description: First checks EDX to see if non-integer has been
-				;			entered, then compares EAX to USER_MAX and
-				;			USER_MIN. If any tests fail displays error, gets
-				;			user input again, and rechecks data. EAX is valid
-				;			when the procedure is done.
- 0000008D			validate PROC
- 0000008D  55				push		EBP
- 0000008E  8B EC			mov		EBP, ESP
- 00000090  8B 55 08			mov		EDX, [EBP+8]
- 00000093  8B 45 0C			mov		EAX, [EBP+12]
- 00000096  EB 14			jmp		check ;jumps over error message initially
+				;	Inputs: read1, intro4, error1, covnum (all from system stack)
+				;	Outputs: covnum (on system stack)
+				;	Description: Converts user string into integer then checks if integer is
+				;			in acceptable range. If not gets new string from user and repeats.
+ 0000010E			validate PROC
+ 0000010E  50				push		EAX
+ 0000010F  51				push		ECX
+ 00000110  52				push		EDX
+ 00000111  56				push		ESI
+ 00000112  55				push		EBP
+ 00000113  8B EC			mov		EBP, ESP
+ 00000115  8B 75 34			mov		ESI, [EBP+52]
+ 00000118  EB 2D			jmp		convert 
 
- 00000098			inval:	;error message
- 00000098  BA 00000068 R		mov		EDX, OFFSET error1
- 0000009D  E8 00000000 E		call		WriteString
- 000000A2  E8 00000000 E		call		ReadInt
- 000000A7  E8 00000000 E		call		Crlf
+ 0000011A			inval:	
+					displayString	EBP+40 ;error message
+ 0000011A  52		     1		push	EDX
+ 0000011B  8B 55 28	     1		mov	EDX, [EBP+40]
+ 0000011E  E8 00000000 E     1		call	WriteString
+ 00000123  5A		     1		pop	EDX
+ 00000124  E8 00000000 E		call		Crlf
+					getString	EBP+32, EBP+36 ;ask user for input
+ 00000129  51		     1		push	ECX
+ 0000012A  52		     1		push	EDX
+ 0000012B  8B 55 24	     1		mov	EDX, [EBP+36]
+ 0000012E  E8 00000000 E     1		call	WriteString
+ 00000133  8B 55 20	     1		mov	EDX, [EBP+32]
+ 00000136  B9 0000000B	     1		mov	ECX, 11 ;hardcoded to continue testing, fix before deadline
+ 0000013B  E8 00000000 E     1		call	ReadString
+ 00000140  5A		     1		pop	EDX
+ 00000141  59		     1		pop	ECX
+ 00000142  E8 00000000 E		call		Crlf
 
- 000000AC			check:	;checks EAX against upper and lower limits
- 000000AC  70 EA			jo		inval ;goes to end if non-integer is entered
- 000000AE  3D 000000C8			cmp		EAX, USER_MAX
- 000000B3  7F E3			jnle		inval ;goes to end if greater than 200
- 000000B5  83 F8 0A			cmp		EAX, USER_MIN
- 000000B8  7C DE			jnge		inval ;goes to end if less than 10
- 000000BA  89 45 0C			mov		[EBP+12], EAX
- 000000BD  5D				pop		EBP
- 000000BE  C2 0004			ret 4	;pops the EDX value off the stack and returns
- 000000C1			validate ENDP
+ 00000147			convert:
+ 00000147  8B 55 20			mov		EDX,	[EBP+32]
+ 0000014A  E8 00000000 E		call		ParseDecimal32 ;converts string in EDX to number in EAX
+								
+ 0000014F			check:	;checks EAX against upper and lower limits
+ 0000014F  3D 19999999			cmp		EAX, USER_MAX
+ 00000154  7F C4			jnle		inval ;goes to end if greater than 200
+ 00000156  83 F8 01			cmp		EAX, USER_MIN
+ 00000159  7C BF			jnge		inval ;goes to end if less than 10
 
-				;	generate procedure
-				;	Inputs: array, arrSize (both from system stack)
-				;	Outputs: none
-				;	Description: Fills the array up to arrSize with random integers that
-				;			range from RAND_MIN to RAND_MAX.
- 000000C1			generate PROC
- 000000C1  55				push		EBP
- 000000C2  8B EC			mov		EBP, ESP
+ 0000015B  89 06			mov		[ESI],EAX
 
-					;This section of code is based on the Mult.asm code sample
-					;on page 357 of textbook
- 000000C4  FC				cld		
- 000000C5  8B 75 0C			mov		ESI, [EBP+12]	;move array address to ESI
- 000000C8  8B FE			mov		EDI, ESI
- 000000CA  8B 45 08			mov		EAX, [EBP+8]	;move arrSize to ECX
- 000000CD  8B 08			mov		ECX, [EAX]
+ 0000015D  5D				pop		EBP
+ 0000015E  5E				pop		ESI
+ 0000015F  5A				pop		EDX
+ 00000160  59				pop		ECX
+ 00000161  58				pop		EAX
+ 00000162  C3				ret 
+ 00000163			validate ENDP
 
- 000000CF			Arrgen:	;loop that generates random ints and puts them in the array
- 000000CF  B8 000003E7			mov		EAX, RAND_MAX
- 000000D4  83 E8 64			sub		EAX, RAND_MIN
- 000000D7  40				inc		EAX
- 000000D8  E8 00000000 E		call		RandomRange
- 000000DD  83 C0 64			add		EAX, RAND_MIN
- 000000E0  AB				stosd
- 000000E1  E2 EC			loop		Arrgen
+				;	sumArr procedure
+				;	Inputs: intArr, arrSize, sum (all from system stack)
+				;	Outputs: sum (on system stack)
+				;	Description: Adds all the values in intArr and pushes the result to sum.
+ 00000163			sumArr PROC
+ 00000163  56				push		ESI
+ 00000164  53				push		EBX
+ 00000165  50				push		EAX
+ 00000166  51				push		ECX
+ 00000167  55				push		EBP
+ 00000168  8B EC			mov		EBP, ESP
+ 0000016A  8B 4D 1C			mov		ECX, [EBP+28] ;intArr
+ 0000016D  8B 75 18			mov		ESI, [EBP+24] ;arrSize
+ 00000170  8B 1E			mov		EBX, [ESI] ;sum variable
+ 00000172  8B 75 20			mov		ESI, [EBP+32]
 
- 000000E3  5D				pop		EBP
- 000000E4  C3				ret
- 000000E5			generate ENDP
+ 00000175			sumL1:
+ 00000175  FC				cld
+ 00000176  AD				lodsd	;loads next number from intArr into EAX
+ 00000177  03 D8			add		EBX, EAX
+ 00000179  E2 FA			loop		sumL1
+ 0000017B  8B 45 18			mov		EAX, [EBP+24]
+ 0000017E  89 18			mov		[EAX], EBX ;moves sum to sum variable
 
-				;	display procedure
-				;	Inputs: array, arrSize (both from system stack)
-				;	Outputs: none
-				;	Description: Prints the contents of array to the screen with a
-				;			line break every 10 items.
- 000000E5			display PROC
- 000000E5  55				push		EBP
- 000000E6  8B EC			mov		EBP, ESP
- 000000E8  FC				cld		
- 000000E9  8B 75 0C			mov		ESI, [EBP+12]	;move array address to ESI
- 000000EC  8B 45 08			mov		EAX, [EBP+8]	
- 000000EF  8B 08			mov		ECX, [EAX]	;move arrSize to ECX
+ 00000180  5D				pop		EBP
+ 00000181  59				pop		ECX
+ 00000182  58				pop		EAX
+ 00000183  5B				pop		EBX
+ 00000184  5E				pop		ESI
+ 00000185  C2 000C			ret	12
+ 00000188			sumArr ENDP
 
- 000000F1  BA 000000A4 R		mov		EDX, OFFSET disp1
- 000000F6  E8 00000000 E		call		WriteString
- 000000FB  E8 00000000 E		call		Crlf
+				;	aveArr procedure
+				;	Inputs: sum, arrSize mean (all from system stack)
+				;	Outputs: mean (on system stack)
+				;	Description: Divides sum by arrSize and pushed the result to mean.
+ 00000188			aveArr PROC
+ 00000188  50				push		EAX
+ 00000189  53				push		EBX
+ 0000018A  52				push		EDX
+ 0000018B  56				push		ESI
+ 0000018C  55				push		EBP
+ 0000018D  8B EC			mov		EBP, ESP
+ 0000018F  8B 75 20			mov		ESI, [EBP+32]
+ 00000192  8B 06			mov		EAX, [ESI] ;sum
+ 00000194  8B 5D 1C			mov		EBX, [EBP+28] ;arrSize
+ 00000197  8B 75 18			mov		ESI, [EBP+24] ;mean
+
+ 0000019A  BA 00000000			mov		EDX, 0
+ 0000019F  F7 F3			div		EBX
+ 000001A1  8B D8			mov		EBX, EAX 
+ 000001A3  89 1E			mov		[ESI], EBX  ;moves average in mean
+
+ 000001A5  5D				pop		EBP
+ 000001A6  5E				pop		ESI
+ 000001A7  5A				pop		EDX
+ 000001A8  5B				pop		EBX
+ 000001A9  58				pop		EAX
+ 000001AA  C2 000C			ret	12
+
+ 000001AD			aveArr ENDP
+
+				;	writeVal procedure
+				;	Inputs: number from system stack
+				;	Outputs: None
+				;	Description: Takes the number on the top of the stack, converts it
+				;			to a string and prints it.
+ 000001AD			writeVal PROC
+ 0000016B			.data	
+ 0000016B  0000000B [			intStr	byte	11	DUP(0) ;local string for printing integers
+	    00
+	   ]
+ 000001AD			.code
+ 000001AD  50				push		EAX
+ 000001AE  53				push		EBX
+ 000001AF  51				push		ECX
+ 000001B0  52				push		EDX
+ 000001B1  57				push		EDI
+ 000001B2  56				push		ESI
+ 000001B3  55				push		EBP
+ 000001B4  8B EC			mov		EBP, ESP
+
+ 000001B6  BA 00000000			mov		EDX, 0
+ 000001BB  8B 45 20			mov		EAX, [EBP+32] ;number to convert to string
+ 000001BE  BB 0000000A			mov		EBX, 10 ;to ensure each digit is recorded
+ 000001C3  B9 00000000			mov		ECX, 0 ;count of digits pushed to stack
+ 000001C8  BF 0000016B R		mov		EDI, OFFSET intStr
+
+ 000001CD  83 F8 0A			cmp		EAX, 10
+ 000001D0  7D 07			jge		strLoop ;jumps to loop if number is 2 or more digits long
+ 000001D2  83 C0 30			add		EAX, 48 ;convert to ASCII character
+ 000001D5  50				push		EAX
+ 000001D6  41				inc		ECX
+ 000001D7  EB 16			jmp		wrtLoop
+
+ 000001D9			strLoop:
+ 000001D9  BA 00000000			mov		EDX, 0
+ 000001DE  F7 F3			div		EBX
+ 000001E0  83 C2 30			add		EDX, 48 ;convert to ASCII character
+ 000001E3  52				push		EDX
+ 000001E4  41				inc		ECX
+ 000001E5  83 F8 0A			cmp		EAX, 10
+ 000001E8  7D EF			jge		strLoop ;if remainder exists loop
+
+ 000001EA  83 C0 30			add		EAX, 48 ;convert to ASCII character
+ 000001ED  50				push		EAX
+ 000001EE  41				inc		ECX
+
+ 000001EF			wrtLoop:	;writes digits in stack to intStr
+ 000001EF  FC				cld
+ 000001F0  58				pop		EAX
+ 000001F1  AA				stosb	
+ 000001F2  E2 FB			loop		wrtLoop
+
+					displayString	OFFSET intStr
+ 000001F4  52		     1		push	EDX
+ 000001F5  BA 0000016B R     1		mov	EDX, [OFFSET intStr]
+ 000001FA  E8 00000000 E     1		call	WriteString
+ 000001FF  5A		     1		pop	EDX
+
+ 00000200  BF 0000016B R		mov		EDI, OFFSET intStr
+ 00000205  B9 0000000B			mov		ECX,	SIZEOF intStr
+ 0000020A  B8 00000000			mov		EAX, 0
+ 0000020F  FC				cld
+ 00000210  F3/ AB			rep		stosd ;clears the string for the next iteration
 					
+ 00000212  5D				pop		EBP
+ 00000213  5E				pop		ESI
+ 00000214  5F				pop		EDI
+ 00000215  5A				pop		EDX
+ 00000216  59				pop		ECX
+ 00000217  5B				pop		EBX
+ 00000218  58				pop		EAX
+ 00000219  C2 0004			ret	4
+ 0000021C			writeVal ENDP
 
- 00000100			PrintL:	;loop that prints the contents of the array
- 00000100  AD				lodsd
- 00000101  E8 00000000 E		call		WriteDec
- 00000106  BA 000000C2 R		mov		EDX, OFFSET space1
- 0000010B  E8 00000000 E		call		WriteString
- 00000110  8B 5D 08			mov		EBX, [EBP+8]
- 00000113  8B 03			mov		EAX, [EBX]
- 00000115  40				inc		EAX
- 00000116  2B C1			sub		EAX, ECX
- 00000118  83 F8 00			cmp		EAX, 0
- 0000011B  74 16			je		PrintL2	;prevents new line on first iteration
- 0000011D  BB 0000000A			mov		EBX, 10
- 00000122  BA 00000000			mov		EDX, 0
- 00000127  F7 F3			div		EBX
- 00000129  83 FA 00			cmp		EDX, 0	;will be 0 every 10 iterations
- 0000012C  75 05			jne		PrintL2	
- 0000012E  E8 00000000 E		call		Crlf		;new line every 10 iterations
- 00000133			PrintL2:	;PrintL loop part 2
- 00000133  E2 CB			loop		PrintL
+				;	results procedure
+				;	Inputs: result1, arrSize, intArr, tab1, result2, sum, result3, mean (from system stack)
+				;	Outputs: None
+				;	Description: Prints out the array, sum, and average.
+ 0000021C			results PROC
+ 0000021C  50				push		EAX
+ 0000021D  51				push		ECX
+ 0000021E  52				push		EDX
+ 0000021F  56				push		ESI
+ 00000220  55				push		EBP
+ 00000221  8B EC			mov		EBP, ESP
 
- 00000135  E8 00000000 E		call		Crlf
+					displayString	EBP+24 ;result1
+ 00000223  52		     1		push	EDX
+ 00000224  8B 55 18	     1		mov	EDX, [EBP+24]
+ 00000227  E8 00000000 E     1		call	WriteString
+ 0000022C  5A		     1		pop	EDX
+ 0000022D  E8 00000000 E		call		Crlf
 
- 0000013A  5D				pop		EBP
- 0000013B  C3				ret
- 0000013C			display ENDP
+ 00000232  8B 4D 1C			mov		ECX, [EBP+28] ;arrSize
+ 00000235  8B 75 20			mov		ESI, [EBP+32] ;intArr 
+ 00000238  FC				cld
 
-				;	sort procedure
-				;	Inputs: array, arrSize (both from system stack)
-				;	Outputs: none
-				;	Description: Sorts the array in descending order. Largely taken
-				;			from BubbleSort program on page 375 of textbook.
- 0000013C			sort PROC
- 0000013C  55				push		EBP
- 0000013D  8B EC			mov		EBP, ESP
+ 00000239			ArrayL1:
+ 00000239  AD				lodsd
+ 0000023A  50				push		EAX
+ 0000023B  E8 FFFFFF6D			call		writeVal
+					displayString	EBP+36 ;tab
+ 00000240  52		     1		push	EDX
+ 00000241  8B 55 24	     1		mov	EDX, [EBP+36]
+ 00000244  E8 00000000 E     1		call	WriteString
+ 00000249  5A		     1		pop	EDX
+ 0000024A  E2 ED			loop		ArrayL1
+ 0000024C  E8 00000000 E		call		Crlf
 
- 0000013F  8B 5D 08			mov		EBX, [EBP+8]
- 00000142  8B 0B			mov		ECX, [EBX]	;move arrSize to ECX
- 00000144  49				dec		ECX
+					displayString	EBP+40 ;result2
+ 00000251  52		     1		push	EDX
+ 00000252  8B 55 28	     1		mov	EDX, [EBP+40]
+ 00000255  E8 00000000 E     1		call	WriteString
+ 0000025A  5A		     1		pop	EDX
+ 0000025B  E8 00000000 E		call		Crlf
 
- 00000145			L1:
- 00000145  51				push		ECX
- 00000146  8B 5D 0C			mov		EBX, [EBP+12]	;move array address to ESI
- 00000149  8B F3			mov		ESI, EBX
+ 00000260  8B 75 2C			mov		ESI, [EBP+44] ;sum
+ 00000263  8B 06			mov		EAX, [ESI]
+ 00000265  50				push		EAX
+ 00000266  E8 FFFFFF42			call		writeVal
+ 0000026B  E8 00000000 E		call		Crlf
 
- 0000014B			L2:
- 0000014B  8B 06			mov		EAX, [ESI]
- 0000014D  39 46 04			cmp		[ESI+4], EAX
- 00000150  7C 05			jnge		L3
- 00000152  87 46 04			xchg		EAX, [ESI+4]	;if smaller than next number in array switch them
- 00000155  89 06			mov		[ESI], EAX
+					displayString	EBP+48 ;result3
+ 00000270  52		     1		push	EDX
+ 00000271  8B 55 30	     1		mov	EDX, [EBP+48]
+ 00000274  E8 00000000 E     1		call	WriteString
+ 00000279  5A		     1		pop	EDX
+ 0000027A  E8 00000000 E		call		Crlf
 
- 00000157			L3:
- 00000157  83 C6 04			add		ESI, 4
- 0000015A  E2 EF			loop		L2
+ 0000027F  8B 75 34			mov		ESI, [EBP+52] ;mean
+ 00000282  8B 06			mov		EAX, [ESI]
+ 00000284  50				push		EAX
+ 00000285  E8 FFFFFF23			call		writeVal
+ 0000028A  E8 00000000 E		call		Crlf
 
- 0000015C  59				pop		ECX
- 0000015D  E2 E6			loop		L1
-					
- 0000015F  5D				pop		EBP
- 00000160  C3				ret
- 00000161			sort ENDP
+ 0000028F  5D				pop		EBP
+ 00000290  5E				pop		ESI
+ 00000291  5A				pop		EDX
+ 00000292  59				pop		ECX
+ 00000293  58				pop		EAX
 
-
-				;	median procedure
-				;	Inputs: array, arrSize (both from system stack)
-				;	Outputs: none
-				;	Description: Displays the median number in the array.
- 00000161			median PROC
- 00000161  55				push		EBP
- 00000162  8B EC			mov		EBP, ESP
-
- 00000164  8B 5D 08			mov		EBX, [EBP+8]
- 00000167  8B 03			mov		EAX, [EBX]	;move arrSize to EAX
- 00000169  BA 00000000			mov		EDX, 0
- 0000016E  BB 00000002			mov		EBX, 2
- 00000173  F7 F3			div		EBX			;finds midpoint of array
- 00000175  BB 00000004			mov		EBX, 4
- 0000017A  F7 E3			mul		EBX			;midpoint of array address offset
- 0000017C  8B 75 0C			mov		ESI, [EBP+12]	;move array to ESI
- 0000017F  8B 04 30			mov		EAX, [ESI+EAX]	;move median of array to EAX
-
- 00000182  BA 000000C4 R		mov		EDX, OFFSET medi1
- 00000187  E8 00000000 E		call		Crlf
- 0000018C  E8 00000000 E		call		WriteString
- 00000191  E8 00000000 E		call		WriteDec
- 00000196  E8 00000000 E		call		Crlf
- 0000019B  E8 00000000 E		call		Crlf
-
- 000001A0  5D				pop		EBP
- 000001A1  C3				ret
- 000001A2			median ENDP
+ 00000294  C2 0020			ret 32
+ 00000297			results ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/16/17 00:24:29
-Array Sort     (Program5.asm				     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.00.24210.0	    03/16/17 21:20:48
+Macro Array     (Program6a.asm				     Symbols 2 - 1
 
 
+
+
+Macros:
+
+                N a m e                 Type
+
+displayString  . . . . . . . . .	Proc
+getString  . . . . . . . . . . .	Proc
 
 
 Structures and Unions:
@@ -428,8 +616,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000040A Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000001A2 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000176 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000297 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -536,24 +724,24 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-display  . . . . . . . . . . . .	P Near	 000000E5 _TEXT	Length= 00000057 Public STDCALL
-  PrintL . . . . . . . . . . . .	L Near	 00000100 _TEXT	
-  PrintL2  . . . . . . . . . . .	L Near	 00000133 _TEXT	
-generate . . . . . . . . . . . .	P Near	 000000C1 _TEXT	Length= 00000024 Public STDCALL
-  Arrgen . . . . . . . . . . . .	L Near	 000000CF _TEXT	
-getUserData  . . . . . . . . . .	P Near	 00000058 _TEXT	Length= 00000035 Public STDCALL
-intro  . . . . . . . . . . . . .	P Near	 00000039 _TEXT	Length= 0000001F Public STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000039 Public STDCALL
-median . . . . . . . . . . . . .	P Near	 00000161 _TEXT	Length= 00000041 Public STDCALL
+aveArr . . . . . . . . . . . . .	P Near	 00000188 _TEXT	Length= 00000025 Public STDCALL
+intro  . . . . . . . . . . . . .	P Near	 0000009C _TEXT	Length= 00000039 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000009C Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+readVal  . . . . . . . . . . . .	P Near	 000000D5 _TEXT	Length= 00000039 Public STDCALL
+  ArrLoop1 . . . . . . . . . . .	L Near	 000000DE _TEXT	
+results  . . . . . . . . . . . .	P Near	 0000021C _TEXT	Length= 0000007B Public STDCALL
+  ArrayL1  . . . . . . . . . . .	L Near	 00000239 _TEXT	
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-sort . . . . . . . . . . . . . .	P Near	 0000013C _TEXT	Length= 00000025 Public STDCALL
-  L1 . . . . . . . . . . . . . .	L Near	 00000145 _TEXT	
-  L2 . . . . . . . . . . . . . .	L Near	 0000014B _TEXT	
-  L3 . . . . . . . . . . . . . .	L Near	 00000157 _TEXT	
-validate . . . . . . . . . . . .	P Near	 0000008D _TEXT	Length= 00000034 Public STDCALL
-  inval  . . . . . . . . . . . .	L Near	 00000098 _TEXT	
-  check  . . . . . . . . . . . .	L Near	 000000AC _TEXT	
+sumArr . . . . . . . . . . . . .	P Near	 00000163 _TEXT	Length= 00000025 Public STDCALL
+  sumL1  . . . . . . . . . . . .	L Near	 00000175 _TEXT	
+validate . . . . . . . . . . . .	P Near	 0000010E _TEXT	Length= 00000055 Public STDCALL
+  inval  . . . . . . . . . . . .	L Near	 0000011A _TEXT	
+  convert  . . . . . . . . . . .	L Near	 00000147 _TEXT	
+  check  . . . . . . . . . . . .	L Near	 0000014F _TEXT	
+writeVal . . . . . . . . . . . .	P Near	 000001AD _TEXT	Length= 0000006F Public STDCALL
+  strLoop  . . . . . . . . . . .	L Near	 000001D9 _TEXT	
+  wrtLoop  . . . . . . . . . . .	L Near	 000001EF _TEXT	
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
@@ -571,6 +759,7 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 ALT_MASK . . . . . . . . . . . .	Number	 00000003h   
+ARR_MAX  . . . . . . . . . . . .	Number	 0000000Ah   
 CAPSLOCK_ON  . . . . . . . . . .	Number	 00000080h   
 CREATE_ALWAYS  . . . . . . . . .	Number	 00000002h   
 CREATE_NEW . . . . . . . . . . .	Number	 00000001h   
@@ -675,8 +864,6 @@ NUMLOCK_ON . . . . . . . . . . .	Number	 00000020h
 OPEN_ALWAYS  . . . . . . . . . .	Number	 00000004h   
 OPEN_EXISTING  . . . . . . . . .	Number	 00000003h   
 PeekConsoleInput . . . . . . . .	Text   	 PeekConsoleInputA
-RAND_MAX . . . . . . . . . . . .	Number	 000003E7h   
-RAND_MIN . . . . . . . . . . . .	Number	 00000064h   
 RIGHT_ALT_PRESSED  . . . . . . .	Number	 00000001h   
 RIGHT_CTRL_PRESSED . . . . . . .	Number	 00000004h   
 ReadConsoleInput . . . . . . . .	Text   	 ReadConsoleInputA
@@ -691,8 +878,8 @@ SetConsoleTitle  . . . . . . . .	Text   	 SetConsoleTitleA
 TAB  . . . . . . . . . . . . . .	Number	 00000009h   
 TRUE . . . . . . . . . . . . . .	Number	 00000001h   
 TRUNCATE_EXISTING  . . . . . . .	Number	 00000005h   
-USER_MAX . . . . . . . . . . . .	Number	 000000C8h   
-USER_MIN . . . . . . . . . . . .	Number	 0000000Ah   
+USER_MAX . . . . . . . . . . . .	Number	 19999999h   
+USER_MIN . . . . . . . . . . . .	Number	 00000001h   
 VK_11  . . . . . . . . . . . . .	Number	 000000BDh   
 VK_12  . . . . . . . . . . . . .	Number	 000000BBh   
 VK_ADD . . . . . . . . . . . . .	Number	 0000006Bh   
@@ -774,21 +961,22 @@ VK_UP  . . . . . . . . . . . . .	Number	 00000026h
 WINDOW_BUFFER_SIZE_EVENT . . . .	Number	 00000004h   
 WriteConsoleOutputCharacter  . .	Text   	 WriteConsoleOutputCharacterA
 WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
-arrSize  . . . . . . . . . . . .	DWord	 000000E6 _DATA	
-array  . . . . . . . . . . . . .	DWord	 000000EA _DATA	
+arrSize  . . . . . . . . . . . .	DWord	 0000008C _DATA	
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
+covnum . . . . . . . . . . . . .	DWord	 00000088 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
-disp1  . . . . . . . . . . . . .	Byte	 000000A4 _DATA	
-error1 . . . . . . . . . . . . .	Byte	 00000068 _DATA	
+error1 . . . . . . . . . . . . .	Byte	 00000129 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
+intArr . . . . . . . . . . . . .	DWord	 00000090 _DATA	
+intStr . . . . . . . . . . . . .	Byte	 0000016B _DATA	
 intro1 . . . . . . . . . . . . .	Byte	 00000000 _DATA	
-intro2 . . . . . . . . . . . . .	Byte	 0000000B _DATA	
-intro3 . . . . . . . . . . . . .	Byte	 0000001C _DATA	
-intro4 . . . . . . . . . . . . .	Byte	 00000046 _DATA	
+intro2 . . . . . . . . . . . . .	Byte	 0000000C _DATA	
+intro3 . . . . . . . . . . . . .	Byte	 0000001D _DATA	
+intro4 . . . . . . . . . . . . .	Byte	 00000070 _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -796,9 +984,14 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-medi1  . . . . . . . . . . . . .	Byte	 000000C4 _DATA	
+mean . . . . . . . . . . . . . .	DWord	 00000125 _DATA	
+read1  . . . . . . . . . . . . .	Byte	 0000007D _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-space1 . . . . . . . . . . . . .	Byte	 000000C2 _DATA	
+result1  . . . . . . . . . . . .	Byte	 000000B8 _DATA	
+result2  . . . . . . . . . . . .	Byte	 000000DF _DATA	
+result3  . . . . . . . . . . . .	Byte	 000000FC _DATA	
+sum  . . . . . . . . . . . . . .	QWord	 0000011D _DATA	
+tab1 . . . . . . . . . . . . . .	Byte	 000000DD _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
